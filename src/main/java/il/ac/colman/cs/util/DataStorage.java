@@ -1,10 +1,10 @@
 package il.ac.colman.cs.util;
 
+import com.mysql.cj.protocol.Resultset;
 import il.ac.colman.cs.ExtractedLink;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,9 +31,26 @@ public class DataStorage {
      * Add link to the database
      */
     public void addLink(ExtractedLink link, String track) {
-        /*
-        This is where we'll add our link
-         */
+        try {
+            PreparedStatement statement = conn.prepareStatement(
+                    "INSERT INTO tweets (link, track, content, title, description, screenshotURL, date) " +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?)");
+            statement.setString(1, link.getLink());
+            statement.setString(2,link.getTrack());
+            statement.setString(3,link.getContent());
+            statement.setString(4,link.getTitle());
+            statement.setString(5,link.getDescription());
+            statement.setString(6,link.getScreenshotURL());
+            statement.setDate(7, new Date(link.getDate().getTime()));
+
+            statement.execute();
+
+            //todo - should we write to logs if something goes wrong?
+            statement.close();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -42,10 +59,27 @@ public class DataStorage {
      * @param query The query to search
      */
     public List<ExtractedLink> search(String query) {
-        /*
-        Search for query in the database and return the results
-         */
 
-        return null;
+        List<ExtractedLink> searchResults = new ArrayList<ExtractedLink>();
+
+        try {
+            ResultSet result = conn.prepareStatement(query).executeQuery();
+            while(result.next()){
+               searchResults.add(new ExtractedLink(
+                        result.getString("link"),
+                        result.getString("track"),
+                        result.getDate("date"),
+                        result.getString("content"),
+                        result.getString("title"),
+                        result.getString("description"),
+                        result.getString("screenshotURL")));
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return searchResults;
     }
 }

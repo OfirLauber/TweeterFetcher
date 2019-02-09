@@ -29,7 +29,15 @@ public class LinkExtractor {
         } catch (Exception ex) {
             description = "";
         }
+        String track;
 
-        return new ExtractedLink(url, new Date(), content, title, description, ScreenshotGenerator.takeScreenshot(url));
+        try {
+            track = document.select("meta[name=track]").get(0).attr("content");
+        } catch (Exception e) {
+            track = "";
+        }
+
+
+        return new ExtractedLink(url, track, new Date(), content, title, description, ScreenshotGenerator.takeScreenshot(url));
     }
 }
