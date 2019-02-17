@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static java.sql.DriverManager.getConnection;
+
 /**
  * Abstraction layer for database access
  */
@@ -24,6 +26,7 @@ public class DataStorage {
 
         String jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?user=%s&password=%s", hostname, port, dbName, username, password);
 
+        DriverManager.registerDriver(new com.mysql.cj.jdbc.Driver());
         conn = DriverManager.getConnection(jdbcUrl);
     }
 
@@ -33,14 +36,14 @@ public class DataStorage {
     public void addLink(ExtractedLink link, String track) {
         try {
             PreparedStatement statement = conn.prepareStatement(
-                    "INSERT INTO tweets (link, track, content, title, description, screenshotURL, date) " +
+                    "INSERT INTO links (link, track, content, title, description, screenshotURL, date) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?)");
             statement.setString(1, link.getLink());
-            statement.setString(2,link.getTrack());
-            statement.setString(3,link.getContent());
-            statement.setString(4,link.getTitle());
-            statement.setString(5,link.getDescription());
-            statement.setString(6,link.getScreenshotURL());
+            statement.setString(2, track);
+            statement.setString(3, link.getContent());
+            statement.setString(4, link.getTitle());
+            statement.setString(5, link.getDescription());
+            statement.setString(6, link.getScreenshotURL());
             statement.setDate(7, new Date(link.getDate().getTime()));
 
             statement.execute();
@@ -67,7 +70,6 @@ public class DataStorage {
             while(result.next()){
                searchResults.add(new ExtractedLink(
                         result.getString("link"),
-                        result.getString("track"),
                         result.getDate("date"),
                         result.getString("content"),
                         result.getString("title"),

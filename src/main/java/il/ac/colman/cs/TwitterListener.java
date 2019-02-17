@@ -42,7 +42,7 @@ public class TwitterListener {
                 URLEntity[] urlEntities = status.getURLEntities();
                 if (urlEntities.length != 0) {
                     for (URLEntity urlEntity : urlEntities) {
-                        FetchedTweet fetchedTweet = new FetchedTweet(urlEntity.getText(), System.getProperty("config.twitter.track"));
+                        FetchedTweet fetchedTweet = new FetchedTweet(urlEntity.getExpandedURL(), System.getProperty("config.twitter.track"));
                         client.sendMessage(System.getProperty("config.sqs.url"), gson.toJson(fetchedTweet));
                     }
                 }

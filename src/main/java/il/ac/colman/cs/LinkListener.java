@@ -28,9 +28,13 @@ public class LinkListener {
                 Thread.sleep(5000);
             } else {
                 for (Message message : messages) {
-                    FetchedTweet fetchedTweet = gson.fromJson(message.getBody(), FetchedTweet.class);
-                    ExtractedLink extractedLink = linkExtractor.extractContent(fetchedTweet.getUrl());
-                    dataStorage.addLink(extractedLink, fetchedTweet.getTrack());
+                    try {
+                        FetchedTweet fetchedTweet = gson.fromJson(message.getBody(), FetchedTweet.class);
+                        ExtractedLink extractedLink = linkExtractor.extractContent(fetchedTweet.getUrl());
+                        dataStorage.addLink(extractedLink, fetchedTweet.getTrack());
+                    } catch (Exception ex) {
+                        // Do nothing
+                    }
                 }
             }
         }
