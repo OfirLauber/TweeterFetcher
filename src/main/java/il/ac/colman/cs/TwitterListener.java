@@ -1,6 +1,9 @@
 package il.ac.colman.cs;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
+import com.amazonaws.services.cloudwatch.model.*;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.google.gson.Gson;
@@ -45,6 +48,21 @@ public class TwitterListener {
                         FetchedTweet fetchedTweet = new FetchedTweet(urlEntity.getExpandedURL(), System.getProperty("config.twitter.track"));
                         client.sendMessage(System.getProperty("config.sqs.url"), gson.toJson(fetchedTweet));
                     }
+
+                    final AmazonCloudWatch cw = AmazonCloudWatchClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
+                    Dimension dimension = new Dimension().withName("TRACK").withValue(System.getProperty("config.twitter.track"));
+
+                    MetricDatum datum = new MetricDatum()
+                            .withMetricName("TwitterListener")
+                            .withUnit(StandardUnit.None)
+                            .withValue(Double.parseDouble(String.valueOf(urlEntities.length)))
+                            .withDimensions(dimension);
+
+                    PutMetricDataRequest metRequest = new PutMetricDataRequest()
+                            .withNamespace("DanaAndOfir")
+                            .withMetricData(datum);
+
+                    PutMetricDataResult response = cw.putMetricData(metRequest);
                 }
             }
 

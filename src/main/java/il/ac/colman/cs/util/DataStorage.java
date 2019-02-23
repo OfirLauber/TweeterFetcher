@@ -48,7 +48,6 @@ public class DataStorage {
 
             statement.execute();
 
-            //todo - should we write to logs if something goes wrong?
             statement.close();
             
         } catch (SQLException e) {
