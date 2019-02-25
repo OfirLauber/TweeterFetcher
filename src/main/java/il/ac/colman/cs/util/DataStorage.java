@@ -47,8 +47,16 @@ public class DataStorage {
             statement.setDate(7, new Date(link.getDate().getTime()));
 
             statement.execute();
-
             statement.close();
+
+            ResultSet rowsNumerResult = conn.prepareStatement("select count(*) as 'row_count' from links").executeQuery();
+
+            while(rowsNumerResult.next()){
+                if(rowsNumerResult.getInt("row_count") > 1000){
+                    // delete older links
+                    this.deleteIrrelevantLinks();
+                }
+            }
             
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,9 +71,11 @@ public class DataStorage {
     public List<ExtractedLink> search(String query) {
 
         List<ExtractedLink> searchResults = new ArrayList<ExtractedLink>();
+        String queryForSearch = String.format("SELECT * FROM links WHERE content = '%s' OR title = '%s' OR description = '%s'",
+                query, query, query);
 
         try {
-            ResultSet result = conn.prepareStatement(query).executeQuery();
+            ResultSet result = conn.prepareStatement(queryForSearch).executeQuery();
             while(result.next()){
                searchResults.add(new ExtractedLink(
                         result.getString("link"),
@@ -80,7 +90,15 @@ public class DataStorage {
             e.printStackTrace();
         }
 
-
         return searchResults;
+    }
+
+    public void deleteIrrelevantLinks(){
+        try {
+            conn.prepareStatement("delete from links order by date asc limit 100 ").execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
