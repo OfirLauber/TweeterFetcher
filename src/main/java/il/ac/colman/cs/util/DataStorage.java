@@ -57,7 +57,7 @@ public class DataStorage {
                     this.deleteIrrelevantLinks();
                 }
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -71,8 +71,7 @@ public class DataStorage {
     public List<ExtractedLink> search(String query) {
 
         List<ExtractedLink> searchResults = new ArrayList<ExtractedLink>();
-        String queryForSearch = String.format("SELECT * FROM links WHERE content = '%s' OR title = '%s' OR description = '%s'",
-                query, query, query);
+        String queryForSearch = "SELECT * FROM links WHERE content like '%" + query + "%' OR title like '%" + query + "%' OR description like '%" + query + "%'";
 
         try {
             ResultSet result = conn.prepareStatement(queryForSearch).executeQuery();
@@ -95,7 +94,7 @@ public class DataStorage {
 
     public void deleteIrrelevantLinks(){
         try {
-            conn.prepareStatement("delete from links order by date asc limit 100 ").execute();
+            conn.prepareStatement("delete from links order by date asc limit 2 ").execute();
 
         } catch (SQLException e) {
             e.printStackTrace();
