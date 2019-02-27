@@ -16,18 +16,11 @@ public class ScreenshotGenerator {
         String screenshotUrl = "";
         String screenshotPath = System.getProperty("config.screenshot.path");
 
-        String takeScreenshotCommand = String.format("xvfb-run --server-args=\"-screen 0 1024x768x24\" wkhtmltoimage --format png --crop-w 1024 --crop-h 768 --quiet --quality 60 %s %s", url, screenshotPath);
+        String takeScreenshotCommand = String.format("xvfb-run wkhtmltoimage --format png --crop-w 1024 --crop-h 768 --quiet --quality 60 %s %s", url, screenshotPath);
 
         try {
-            String s;
-            System.out.println("Executing command: " + takeScreenshotCommand);
             Process p = Runtime.getRuntime().exec(takeScreenshotCommand);
-            BufferedReader br = new BufferedReader(
-                    new InputStreamReader(p.getErrorStream()));
-            while ((s = br.readLine()) != null)
-                System.out.println("line: " + s);
             p.waitFor();
-            System.out.println("Command Executed: " + p.exitValue());
 
             String bucketName = System.getProperty("config.s3.bucket.name");
             AmazonS3 client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
